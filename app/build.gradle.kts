@@ -1,6 +1,10 @@
 plugins {
+    kotlin("kapt")
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.pluginKsp)
+    alias(libs.plugins.pluginDaggerHilt)
 }
 
 android {
@@ -59,6 +63,14 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    //Rooms
+    implementation(libs.bundles.room)
+    //Hilt
+    implementation(libs.daggerHilt)
+    //Ksp
+    ksp(libs.androidx.room.compiler)
+    //Kapt
+    kapt(libs.daggerHiltCompiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -66,4 +78,8 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+}
+
+kapt {
+    correctErrorTypes = true
 }
