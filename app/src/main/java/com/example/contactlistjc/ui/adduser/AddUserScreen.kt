@@ -1,7 +1,9 @@
 package com.example.contactlistjc.ui.adduser
 
 import android.net.Uri
-import android.util.Log
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,8 +21,8 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,40 +30,82 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.contactlistjc.R
+import com.example.contactlistjc.data.repository.local.UserDB
+import com.example.contactlistjc.domain.models.KeyboardActionsConfigModels
 import com.example.contactlistjc.ui.components.CustomButton
 import com.example.contactlistjc.ui.components.CustomFormParam
+import com.example.contactlistjc.ui.components.CustomLoad
 import com.example.contactlistjc.ui.components.CustomTopBar
-import com.example.contactlistjc.ui.extensions.TAG
+import com.example.contactlistjc.ui.components.showErrorDialog
 
 @Composable
 fun AddUserScreen(
+    navController: NavController,
     onSaveClick: () -> Unit = {},
-    addUserViewModel: AddUserViewModel = viewModel()
+    addUserViewModel: AddUserViewModel = hiltViewModel()
 ) {
+    val addUserUiState by addUserViewModel.uiState.collectAsState()
+
+    if (addUserUiState.isLoading) {
+        CustomLoad()
+    } else if (addUserUiState.error != null) {
+        val context = LocalContext.current
+        val errorMessage = addUserUiState.error!!
+        showErrorDialog(context, errorMessage)
+    } else {
+        AddUserLayout(addUserUiState, onSaveClick, onBackClick = {
+            navController.navigateUp()
+        }, addUserViewModel)
+    }
+}
+
+@Composable
+fun AddUserLayout(
+    addUserUiState: AddUserUiState,
+    onSaveClick: () -> Unit = {},
+    onBackClick: () -> Unit = {},
+    addUserViewModel: AddUserViewModel
+) {
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+
+    val getImageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            imageUri = it
+        }
+    }
+
     Scaffold(topBar = {
         CustomTopBar(
             stringResource(R.string.add_user_screen_tool_bar_title),
             backButton = true,
-            optionButton = false
+            optionButton = false,
+            onBackClick = onBackClick
         )
     }, content = { innerPadding ->
         Column(
             modifier = Modifier.padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            val nameFocusRequester = FocusRequester()
+            val lastNameFocusRequester = FocusRequester()
+            val addressFocusRequester = FocusRequester()
+            val numberFocusRequester = FocusRequester()
             var name by remember { mutableStateOf("") }
             var lastName by remember { mutableStateOf("") }
             var address by remember { mutableStateOf("") }
             var number by remember { mutableStateOf("") }
-            val imageUri by remember { mutableStateOf<Uri?>(null) }
 
             Box(
                 modifier = Modifier
@@ -69,8 +113,8 @@ fun AddUserScreen(
                     .clip(CircleShape)
                     .border(2.dp, Color.Gray, CircleShape)
                     .clickable {
-                    },
-                contentAlignment = Alignment.Center
+                        addImage(getImageLauncher)
+                    }, contentAlignment = Alignment.Center
             ) {
                 if (imageUri == null) {
                     Icon(
@@ -90,40 +134,71 @@ fun AddUserScreen(
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
-            CustomFormParam(title = stringResource(R.string.add_user_screen_param_name),
+            CustomFormParam(
+                title = stringResource(R.string.add_user_screen_param_name),
                 icon = Icons.Filled.Person,
                 value = name,
-                onValueChange = { name = it })
-            CustomFormParam(title = stringResource(R.string.add_user_screen_param_last_name),
+                onValueChange = { name = it },
+                keyboardConfig = KeyboardActionsConfigModels(
+                    focusRequester = nameFocusRequester, nextParam = lastNameFocusRequester
+                ),
+                isError = addUserUiState.nameError,
+            )
+            CustomFormParam(
+                title = stringResource(R.string.add_user_screen_param_last_name),
                 icon = null,
                 value = lastName,
-                onValueChange = { lastName = it })
-            CustomFormParam(title = stringResource(R.string.add_user_screen_param_address),
+                onValueChange = { lastName = it },
+                keyboardConfig = KeyboardActionsConfigModels(
+                    focusRequester = lastNameFocusRequester, nextParam = addressFocusRequester
+                ),
+                isError = addUserUiState.lastNameError,
+            )
+            CustomFormParam(
+                title = stringResource(R.string.add_user_screen_param_address),
                 icon = Icons.Filled.Home,
                 value = address,
-                onValueChange = { address = it })
-            CustomFormParam(title = stringResource(R.string.add_user_screen_param_phone_number),
+                onValueChange = { address = it },
+                keyboardConfig = KeyboardActionsConfigModels(
+                    focusRequester = addressFocusRequester, nextParam = numberFocusRequester
+                ),
+                isError = addUserUiState.addressError
+            )
+            CustomFormParam(
+                title = stringResource(R.string.add_user_screen_param_phone_number),
                 icon = Icons.Filled.Phone,
                 value = number,
-                onValueChange = { number = it })
+                onValueChange = { number = it },
+                keyboardConfig = KeyboardActionsConfigModels(focusRequester = numberFocusRequester,
+                    onDoneClick = {
+                        addUserViewModel.saveUser(
+                            UserDB(
+                                name = name,
+                                lastName = lastName,
+                                address = address,
+                                phoneNumber = number,
+                                avatar = imageUri.toString()
+                            ), onSaveClick
+                        )
+                    }),
+                isError = addUserUiState.phoneNumberError
+            )
             Spacer(modifier = Modifier.height(8.dp))
             CustomButton(text = stringResource(R.string.add_user_screen_save), onClick = {
-                if (addUserViewModel.checkParam(name, lastName, address, number, imageUri)) {
-                    onSaveClick()
-                } else {
-                    Log.d(TAG, "%> Error")
-                }
+                addUserViewModel.saveUser(
+                    UserDB(
+                        name = name,
+                        lastName = lastName,
+                        address = address,
+                        phoneNumber = number,
+                        avatar = imageUri.toString()
+                    ), onSaveClick
+                )
             })
         }
     })
 }
 
-@Preview
-@Composable
-fun AddUserScreenPreview() {
-    Surface(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        AddUserScreen()
-    }
+fun addImage(getImageLauncher: ManagedActivityResultLauncher<String, Uri?>) {
+    getImageLauncher.launch("image/*")
 }

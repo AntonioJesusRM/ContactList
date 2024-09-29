@@ -18,7 +18,11 @@ import com.example.contactlistjc.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomTopBar(
-    title: String, backButton: Boolean, optionButton: Boolean, onOptionClick: () -> Unit = {}
+    title: String,
+    backButton: Boolean,
+    optionButton: Boolean,
+    onOptionClick: () -> Unit = {},
+    onBackClick: () -> Unit = {}
 ) {
     CenterAlignedTopAppBar(title = {
         Text(
@@ -27,7 +31,7 @@ fun CustomTopBar(
         )
     }, navigationIcon = {
         if (backButton) {
-            IconButton(onClick = { }) {
+            IconButton(onClick = onBackClick) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = stringResource(R.string.tool_bar_back_content_description)

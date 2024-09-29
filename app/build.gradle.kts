@@ -76,6 +76,7 @@ dependencies {
 
     //Hilt
     implementation(libs.daggerHilt)
+    implementation(libs.androidx.hilt.navigation.compose)
 
     //Ksp
     ksp(libs.androidx.room.compiler)
