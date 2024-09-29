@@ -2,7 +2,7 @@ package com.example.contactlistjc.ui.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -30,8 +30,7 @@ fun CustomTopBar(
             IconButton(onClick = { }) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.tool_bar_back_content_description),
-                    tint = MaterialTheme.colorScheme.primary
+                    contentDescription = stringResource(R.string.tool_bar_back_content_description)
                 )
             }
         }
@@ -39,9 +38,8 @@ fun CustomTopBar(
         if (optionButton) {
             IconButton(onClick = onOptionClick) {
                 Icon(
-                    imageVector = Icons.Filled.Menu,
-                    contentDescription = stringResource(R.string.tool_bar_options_content_description),
-                    tint = MaterialTheme.colorScheme.primary
+                    imageVector = Icons.Filled.Settings,
+                    contentDescription = stringResource(R.string.tool_bar_options_content_description)
                 )
             }
         }
@@ -51,5 +49,5 @@ fun CustomTopBar(
 @Preview
 @Composable
 fun CustomTopBarPreview() {
-    CustomTopBar(title = "HOME", backButton = true, optionButton = true)
+    CustomTopBar(title = "HOME", backButton = true, optionButton = false)
 }
