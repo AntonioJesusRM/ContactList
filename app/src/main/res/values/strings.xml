@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">Contact List JC</string>
+    <!--Tool bar-->
+    <string name="tool_bar_back_content_description">"Ir atras"</string>
+    <string name="tool_bar_options_content_description">"Opciones"</string>
+    <!-- Add User Screen -->
+    <string name="add_user_screen_tool_bar_title">Add User</string>
+    <string name="add_user_screen_param_name">Nombre</string>
+    <string name="add_user_screen_param_last_name">Apellido</string>
+    <string name="add_user_screen_param_address">Dirección</string>
+    <string name="add_user_screen_param_phone_number">Número de teléfono</string>
+    <string name="add_user_screen_param_image">Añadir imagen</string>
+    <string name="add_user_screen_save">Guardar</string>
+
 </resources>

@@ -19,11 +19,12 @@ fun MainNavHost(
 ) {
     val context = LocalContext.current
     BackHandler {
-        (context as? Activity)?.finishAffinity()
+        if (!navController.popBackStack()) {
+            (context as? Activity)?.finish()
+        }
     }
     NavHost(
-        navController = navController,
-        startDestination = Home.route
+        navController = navController, startDestination = Home.route
     ) {
         composable(route = Home.route) {
             HomeScreen(onChatClick = {
@@ -36,7 +37,7 @@ fun MainNavHost(
         }
 
         composable(route = AddUser.route) {
-            AddUserScreen(onSaveClick = {
+            AddUserScreen(navController, onSaveClick = {
                 navController.navigateSingleTopTo(Home.route)
             })
         }
