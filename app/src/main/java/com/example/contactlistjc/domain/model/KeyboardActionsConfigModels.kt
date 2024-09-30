@@ -1,4 +1,4 @@
-package com.example.contactlistjc.domain.models
+package com.example.contactlistjc.domain.model
 
 import androidx.compose.ui.focus.FocusRequester
 

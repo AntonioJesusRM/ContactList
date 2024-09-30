@@ -55,6 +55,7 @@ fun HomeScreen(
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
     val homeUiState by homeViewModel.uiState.collectAsState()
+    homeViewModel.getUsers()
     if (homeUiState.isLoading) {
         CustomLoad()
     } else if (homeUiState.error != null) {
