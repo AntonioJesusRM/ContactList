@@ -6,4 +6,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface DataSource {
     fun getUsers(): Flow<BaseResponse<List<UserDB>>>
+    fun addUser(user: UserDB): Flow<BaseResponse<Boolean>>
 }

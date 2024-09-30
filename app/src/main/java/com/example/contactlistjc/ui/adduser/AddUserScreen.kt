@@ -1,5 +1,6 @@
 package com.example.contactlistjc.ui.adduser
 
+import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -47,6 +48,8 @@ import com.example.contactlistjc.ui.components.CustomFormParam
 import com.example.contactlistjc.ui.components.CustomLoad
 import com.example.contactlistjc.ui.components.CustomTopBar
 import com.example.contactlistjc.ui.components.showErrorDialog
+import java.io.File
+import java.io.FileOutputStream
 
 @Composable
 fun AddUserScreen(
@@ -61,7 +64,9 @@ fun AddUserScreen(
     } else if (addUserUiState.error != null) {
         val context = LocalContext.current
         val errorMessage = addUserUiState.error!!
-        showErrorDialog(context, errorMessage)
+        showErrorDialog(context, errorMessage) {
+            addUserViewModel.quitError(addUserUiState.user)
+        }
     } else {
         AddUserLayout(addUserUiState, onSaveClick, onBackClick = {
             navController.navigateUp()
@@ -78,11 +83,16 @@ fun AddUserLayout(
 ) {
     var imageUri by remember { mutableStateOf<Uri?>(null) }
 
+    val context = LocalContext.current
+
     val getImageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
-            imageUri = it
+            val savedImagePath = saveImageToInternalStorage(it, context)
+            savedImagePath?.let { path ->
+                imageUri = Uri.parse(path)
+            }
         }
     }
 
@@ -102,10 +112,10 @@ fun AddUserLayout(
             val lastNameFocusRequester = FocusRequester()
             val addressFocusRequester = FocusRequester()
             val numberFocusRequester = FocusRequester()
-            var name by remember { mutableStateOf("") }
-            var lastName by remember { mutableStateOf("") }
-            var address by remember { mutableStateOf("") }
-            var number by remember { mutableStateOf("") }
+            var name by remember { mutableStateOf(addUserUiState.user.name) }
+            var lastName by remember { mutableStateOf(addUserUiState.user.lastName) }
+            var address by remember { mutableStateOf(addUserUiState.user.address) }
+            var number by remember { mutableStateOf(addUserUiState.user.phoneNumber) }
 
             Box(
                 modifier = Modifier
@@ -171,34 +181,81 @@ fun AddUserLayout(
                 onValueChange = { number = it },
                 keyboardConfig = KeyboardActionsConfigModels(focusRequester = numberFocusRequester,
                     onDoneClick = {
-                        addUserViewModel.saveUser(
-                            UserDB(
+                        saveData(
+                            addUserViewModel, imageUri, UserDB(
                                 name = name,
                                 lastName = lastName,
                                 address = address,
                                 phoneNumber = number,
-                                avatar = imageUri.toString()
-                            ), onSaveClick
+                                avatar = ""
+                            ), onSaveClick, context
                         )
                     }),
                 isError = addUserUiState.phoneNumberError
             )
             Spacer(modifier = Modifier.height(8.dp))
             CustomButton(text = stringResource(R.string.add_user_screen_save), onClick = {
-                addUserViewModel.saveUser(
-                    UserDB(
+                saveData(
+                    addUserViewModel, imageUri, UserDB(
                         name = name,
                         lastName = lastName,
                         address = address,
                         phoneNumber = number,
-                        avatar = imageUri.toString()
-                    ), onSaveClick
+                        avatar = ""
+                    ), onSaveClick, context
                 )
             })
         }
     })
 }
 
+fun saveData(
+    addUserViewModel: AddUserViewModel,
+    imageUri: Uri?,
+    user: UserDB,
+    onSaveClick: () -> Unit = {},
+    context: Context
+) {
+    imageUri?.let { uri ->
+        val savedImagePath = saveImageToInternalStorage(uri, context)
+
+        addUserViewModel.saveUser(
+            UserDB(
+                name = user.name,
+                lastName = user.lastName,
+                address = user.address,
+                phoneNumber = user.phoneNumber,
+                avatar = savedImagePath ?: ""
+            ), onSaveClick
+        )
+    } ?: run {
+        addUserViewModel.saveUser(
+            UserDB(
+                name = user.name,
+                lastName = user.lastName,
+                address = user.address,
+                phoneNumber = user.phoneNumber,
+                avatar = ""
+            ), onSaveClick
+        )
+    }
+}
+
 fun addImage(getImageLauncher: ManagedActivityResultLauncher<String, Uri?>) {
     getImageLauncher.launch("image/*")
+}
+
+fun saveImageToInternalStorage(uri: Uri, context: Context): String? {
+    return try {
+        val inputStream = context.contentResolver.openInputStream(uri)
+        val file = File(context.filesDir, "${System.currentTimeMillis()}.jpg")
+        val outputStream = FileOutputStream(file)
+        inputStream?.copyTo(outputStream)
+        outputStream.close()
+        inputStream?.close()
+        file.absolutePath
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
 }

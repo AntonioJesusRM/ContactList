@@ -14,4 +14,8 @@ class DataProvider @Inject constructor(
         return localDataSource.getUsers()
     }
 
+    override fun addUser(user: UserDB): Flow<BaseResponse<Boolean>> {
+        return localDataSource.addUser(user)
+    }
+
 }
