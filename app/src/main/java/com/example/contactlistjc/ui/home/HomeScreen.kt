@@ -1,5 +1,6 @@
 package com.example.contactlistjc.ui.home
 
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -136,18 +137,19 @@ fun HomeLayout(
                                     .clip(CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
-                                if (user.avatar.isEmpty()) {
+                                if (user.avatar.isBlank()) {
                                     Icon(
                                         imageVector = Icons.Default.Person,
                                         contentDescription = null,
                                         modifier = Modifier.size(24.dp)
                                     )
                                 } else {
+                                    val uri = Uri.parse(user.avatar)
                                     Image(
-                                        painter = rememberAsyncImagePainter(user.avatar),
+                                        painter = rememberAsyncImagePainter(uri),
                                         contentDescription = null,
                                         modifier = Modifier
-                                            .fillMaxSize()
+                                            .size(40.dp)
                                             .clip(CircleShape),
                                         contentScale = ContentScale.Crop
                                     )

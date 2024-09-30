@@ -4,7 +4,7 @@
     <string name="tool_bar_back_content_description">"Ir atras"</string>
     <string name="tool_bar_options_content_description">"Opciones"</string>
     <!-- Add User Screen -->
-    <string name="add_user_screen_tool_bar_title">Add User</string>
+    <string name="add_user_screen_tool_bar_title">Añadir contacto</string>
     <string name="add_user_screen_param_name">Nombre</string>
     <string name="add_user_screen_param_last_name">Apellido</string>
     <string name="add_user_screen_param_address">Dirección</string>
@@ -12,12 +12,13 @@
     <string name="add_user_screen_param_image">Añadir imagen</string>
     <string name="add_user_screen_save">Guardar</string>
     <!-- Home Screen -->
-    <string name="home_screen_tool_bar_title">Home</string>
+    <string name="home_screen_tool_bar_title">Inicio</string>
     <string name="home_screen_empty_user_list">No hay usuarios añadidos</string>
     <string name="home_screen_edit_user">Editar usuario</string>
     <string name="home_screen_search_user">Buscar usuario</string>
     <string name="home_screen_add_user">Buscar usuario</string>
     <!-- Database Errors -->
     <string name="database_error_unknown_error">Error desconocido</string>
+    <string name="database_error_user_exist">El usuario ya existe</string>
 
 </resources>

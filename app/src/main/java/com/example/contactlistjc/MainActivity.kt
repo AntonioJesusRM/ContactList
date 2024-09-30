@@ -6,39 +6,33 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
-import com.example.contactlistjc.ui.extensions.TAG
+import coil.Coil
+import coil.ImageLoader
+import coil.decode.GifDecoder
+import coil.decode.VideoFrameDecoder
 import com.example.contactlistjc.ui.theme.ContactListJCTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private lateinit var getImageLauncher: ActivityResultLauncher<Intent>
-
     private val requestPermissions =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             permissions.entries.forEach { entry ->
                 val permissionName = entry.key
                 val isGranted = entry.value
-
-                if (isGranted) {
-                    Log.d(TAG, "%> Permiso concedido")
-                } else {
+                if (!isGranted) {
                     if (!shouldShowRequestPermissionRationale(permissionName)) {
-                        Log.d(TAG, "%> El usuario pulso en no volver a mostrar $permissionName")
                         openAppSettings()
                         finish()
                     } else {
-                        Log.d(TAG, "%> Permiso no concedido")
                         finish()
                     }
                 }
@@ -48,6 +42,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         askPermissionMedia()
+        val imageLoader = ImageLoader.Builder(this).components {
+            add(VideoFrameDecoder.Factory())
+            add(GifDecoder.Factory())
+        }.build()
+        Coil.setImageLoader(imageLoader)
         setContent {
             ContactListJCTheme {
                 Surface(
@@ -79,8 +78,7 @@ class MainActivity : ComponentActivity() {
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requestPermissions.launch(
                 arrayOf(
-                    Manifest.permission.READ_MEDIA_IMAGES,
-                    Manifest.permission.READ_MEDIA_VIDEO
+                    Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO
                 )
             )
         } else {

@@ -70,7 +70,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
 
     //Image compose
-    implementation(libs.coil.compose)
+    implementation(libs.bundles.coil)
 
     //Rooms
     implementation(libs.bundles.room)
