@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.pluginKsp)
     alias(libs.plugins.pluginDaggerHilt)
+    alias(libs.plugins.kotlin.parcelize)
 }
 
 android {

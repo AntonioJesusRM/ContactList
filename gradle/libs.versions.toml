@@ -24,8 +24,9 @@ hilt = "2.49"
 hiltNavigationCompose = "1.2.0"
 
 #Plugins
-pluginKsp = "2.0.0-1.0.23"
+pluginKsp = "2.0.20-1.0.25"
 pluginDaggerHilt = "2.49"
+pluginKotlin = "2.0.20"
 
 
 
@@ -71,3 +72,4 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 pluginKsp = { id = "com.google.devtools.ksp", version.ref = "pluginKsp" }
 pluginDaggerHilt = { id = "com.google.dagger.hilt.android", version.ref = "pluginDaggerHilt" }
+kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "pluginKotlin" }

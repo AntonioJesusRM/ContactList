@@ -41,7 +41,7 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.contactlistjc.R
 import com.example.contactlistjc.data.repository.local.UserDB
-import com.example.contactlistjc.domain.models.KeyboardActionsConfigModels
+import com.example.contactlistjc.domain.model.KeyboardActionsConfigModels
 import com.example.contactlistjc.ui.components.CustomButton
 import com.example.contactlistjc.ui.components.CustomFormParam
 import com.example.contactlistjc.ui.components.CustomLoad
