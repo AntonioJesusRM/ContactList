@@ -11,5 +11,11 @@
     <string name="add_user_screen_param_phone_number">Número de teléfono</string>
     <string name="add_user_screen_param_image">Añadir imagen</string>
     <string name="add_user_screen_save">Guardar</string>
+    <!-- Home Screen -->
+    <string name="home_screen_tool_bar_title">Home</string>
+    <string name="home_screen_empty_user_list">No hay usuarios añadidos</string>
+    <string name="home_screen_edit_user">Editar usuario</string>
+    <string name="home_screen_search_user">Buscar usuario</string>
+    <string name="home_screen_add_user">Buscar usuario</string>
 
 </resources>
