@@ -5,22 +5,14 @@ import android.net.Uri
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -30,21 +22,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import coil.compose.rememberAsyncImagePainter
 import com.example.contactlistjc.R
 import com.example.contactlistjc.data.repository.local.UserDB
 import com.example.contactlistjc.domain.model.KeyboardActionsConfigModels
 import com.example.contactlistjc.ui.components.CustomButton
 import com.example.contactlistjc.ui.components.CustomFormParam
+import com.example.contactlistjc.ui.components.CustomImagePicker
 import com.example.contactlistjc.ui.components.CustomLoad
 import com.example.contactlistjc.ui.components.CustomTopBar
 import com.example.contactlistjc.ui.components.showErrorDialog
@@ -81,19 +70,18 @@ fun AddUserLayout(
     onBackClick: () -> Unit = {},
     addUserViewModel: AddUserViewModel
 ) {
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
-
+    var imageUri by remember {
+        if (addUserUiState.user.avatar.isBlank())
+            mutableStateOf<Uri?>(null)
+        else
+            mutableStateOf<Uri?>(Uri.parse(addUserUiState.user.avatar))
+    }
     val context = LocalContext.current
 
     val getImageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        uri?.let {
-            val savedImagePath = saveImageToInternalStorage(it, context)
-            savedImagePath?.let { path ->
-                imageUri = Uri.parse(path)
-            }
-        }
+        imageUri = uri
     }
 
     Scaffold(topBar = {
@@ -117,33 +105,10 @@ fun AddUserLayout(
             var address by remember { mutableStateOf(addUserUiState.user.address) }
             var number by remember { mutableStateOf(addUserUiState.user.phoneNumber) }
 
-            Box(
-                modifier = Modifier
-                    .size(120.dp)
-                    .clip(CircleShape)
-                    .border(2.dp, Color.Gray, CircleShape)
-                    .clickable {
-                        addImage(getImageLauncher)
-                    }, contentAlignment = Alignment.Center
-            ) {
-                if (imageUri == null) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = null,
-                        modifier = Modifier.size(80.dp)
-                    )
-                } else {
-                    Image(
-                        painter = rememberAsyncImagePainter(imageUri),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
-                }
-            }
+            CustomImagePicker(imageUri, getImageLauncher)
+
             Spacer(modifier = Modifier.height(16.dp))
+
             CustomFormParam(
                 title = stringResource(R.string.add_user_screen_param_name),
                 icon = Icons.Filled.Person,
@@ -179,30 +144,33 @@ fun AddUserLayout(
                 icon = Icons.Filled.Phone,
                 value = number,
                 onValueChange = { number = it },
-                keyboardConfig = KeyboardActionsConfigModels(focusRequester = numberFocusRequester,
+                keyboardConfig = KeyboardActionsConfigModels(
+                    focusRequester = numberFocusRequester,
                     onDoneClick = {
+                        val avatarPath = imageUri?.let { saveImageToInternalStorage(it, context) }
                         saveData(
-                            addUserViewModel, imageUri, UserDB(
+                            addUserViewModel, avatarPath, UserDB(
                                 name = name,
                                 lastName = lastName,
                                 address = address,
                                 phoneNumber = number,
                                 avatar = ""
-                            ), onSaveClick, context
+                            ), onSaveClick
                         )
                     }),
                 isError = addUserUiState.phoneNumberError
             )
             Spacer(modifier = Modifier.height(8.dp))
             CustomButton(text = stringResource(R.string.add_user_screen_save), onClick = {
+                val avatarPath = imageUri?.let { saveImageToInternalStorage(it, context) }
                 saveData(
-                    addUserViewModel, imageUri, UserDB(
+                    addUserViewModel, avatarPath, UserDB(
                         name = name,
                         lastName = lastName,
                         address = address,
                         phoneNumber = number,
                         avatar = ""
-                    ), onSaveClick, context
+                    ), onSaveClick
                 )
             })
         }
@@ -211,34 +179,12 @@ fun AddUserLayout(
 
 fun saveData(
     addUserViewModel: AddUserViewModel,
-    imageUri: Uri?,
+    avatarPath: String?,
     user: UserDB,
-    onSaveClick: () -> Unit = {},
-    context: Context
+    onSaveClick: () -> Unit = {}
 ) {
-    imageUri?.let { uri ->
-        val savedImagePath = saveImageToInternalStorage(uri, context)
-
-        addUserViewModel.saveUser(
-            UserDB(
-                name = user.name,
-                lastName = user.lastName,
-                address = user.address,
-                phoneNumber = user.phoneNumber,
-                avatar = savedImagePath ?: ""
-            ), onSaveClick
-        )
-    } ?: run {
-        addUserViewModel.saveUser(
-            UserDB(
-                name = user.name,
-                lastName = user.lastName,
-                address = user.address,
-                phoneNumber = user.phoneNumber,
-                avatar = ""
-            ), onSaveClick
-        )
-    }
+    val userSave = user.copy(avatar = avatarPath ?: "")
+    addUserViewModel.saveUser(userSave, onSaveClick)
 }
 
 fun addImage(getImageLauncher: ManagedActivityResultLauncher<String, Uri?>) {

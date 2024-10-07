@@ -9,7 +9,7 @@ data object Home : MainDestination {
 }
 
 data object AddUser : MainDestination {
-    override val route = "login"
+    override val route = "addUser"
 }
 
 data object Chat : MainDestination {
