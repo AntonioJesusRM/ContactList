@@ -30,16 +30,23 @@ fun MainNavHost(
             HomeScreen(onChatClick = {
                 navController.navigateSingleTopTo(Chat.route)
             }, onAddUserClick = {
-                navController.navigateSingleTopTo(AddUser.route)
+                navController.navigateSingleTopTo(AddOrEditUser.createRoute(null))
+            }, onEditUserClick = { userId ->
+                navController.navigateSingleTopTo(AddOrEditUser.createRoute(userId))
             }, onOptionClick = {
                 navController.navigateSingleTopTo(Options.route)
             })
         }
 
-        composable(route = AddUser.route) {
-            AddUserScreen(navController, onSaveClick = {
-                navController.navigateSingleTopTo(Home.route)
-            })
+        composable(route = AddOrEditUser.route) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId")
+            AddUserScreen(
+                navController,
+                userName = userId,
+                onSaveClick = {
+                    navController.navigateSingleTopTo(Home.route)
+                }
+            )
         }
 
         composable(route = Chat.route) {

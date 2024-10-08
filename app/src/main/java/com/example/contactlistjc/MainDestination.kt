@@ -8,8 +8,13 @@ data object Home : MainDestination {
     override val route = "home"
 }
 
-data object AddUser : MainDestination {
-    override val route = "login"
+data object AddOrEditUser : MainDestination {
+    override val route = "addOrEditUser/{userId}"
+    fun createRoute(userId: String?) = if (userId != null) {
+        "addOrEditUser/$userId"
+    } else {
+        "addOrEditUser/"
+    }
 }
 
 data object Chat : MainDestination {
