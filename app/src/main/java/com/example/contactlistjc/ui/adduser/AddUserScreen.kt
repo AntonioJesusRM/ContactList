@@ -2,6 +2,7 @@ package com.example.contactlistjc.ui.adduser
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -43,10 +44,16 @@ import java.io.FileOutputStream
 @Composable
 fun AddUserScreen(
     navController: NavController,
+    userName: String?,
     onSaveClick: () -> Unit = {},
     addUserViewModel: AddUserViewModel = hiltViewModel()
 ) {
     val addUserUiState by addUserViewModel.uiState.collectAsState()
+
+    if (userName.isNullOrEmpty())
+        Log.d("TAG", "%> Empty user")
+    else
+        Log.d("TAG", "%> User: $userName")
 
     if (addUserUiState.isLoading) {
         CustomLoad()

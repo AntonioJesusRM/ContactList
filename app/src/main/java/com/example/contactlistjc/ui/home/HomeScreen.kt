@@ -52,6 +52,7 @@ import com.example.contactlistjc.ui.components.showErrorDialog
 fun HomeScreen(
     onChatClick: () -> Unit = {},
     onAddUserClick: () -> Unit = {},
+    onEditUserClick: (String) -> Unit = {},
     onOptionClick: () -> Unit = {},
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -68,6 +69,7 @@ fun HomeScreen(
             homeUiState = homeUiState,
             onChatClick = onChatClick,
             onAddUserClick = onAddUserClick,
+            onEditUserClick = onEditUserClick,
             onOptionClick = onOptionClick
         )
     }
@@ -78,6 +80,7 @@ fun HomeLayout(
     homeUiState: HomeUiState,
     onChatClick: () -> Unit = {},
     onAddUserClick: () -> Unit = {},
+    onEditUserClick: (String) -> Unit = {},
     onOptionClick: () -> Unit = {}
 ) {
     Scaffold(topBar = {
@@ -169,7 +172,7 @@ fun HomeLayout(
                                 contentDescription = stringResource(R.string.home_screen_edit_user),
                                 modifier = Modifier
                                     .size(24.dp)
-                                    .clickable { onAddUserClick() })
+                                    .clickable { onEditUserClick(user.name) })
                         }
                     }
                 }
